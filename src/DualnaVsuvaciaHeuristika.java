@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class DualnaVsuvaciaHeuristika {
-    private FileLoader fileLoader;
 
     private int hmotnostPredmetovVBatohu;
     private int pocetPrvkovVBatohu;
@@ -14,25 +13,27 @@ public class DualnaVsuvaciaHeuristika {
 
     private PriorityQueue<Predmet> zoznamDoposialNespracovanychPredmetov;
     private List<Predmet> batoh;
-    private FileWriter fileWriter;
+    private List<Predmet> nezaradenePredmety;
 
     public DualnaVsuvaciaHeuristika(String suborHmotnosti, String suborCeny) {
-        this.fileLoader = new FileLoader();
+        FileLoader fileLoader = new FileLoader();
         this.HUF = 0;
         try{
-            this.zoznamDoposialNespracovanychPredmetov = this.fileLoader.nacitajPrvky(suborHmotnosti, suborCeny);
+            this.zoznamDoposialNespracovanychPredmetov = fileLoader.nacitajPrvky(suborHmotnosti, suborCeny);
         } catch (IOException e) {
             System.out.println("Nastala chyba pri citani suboru: " + e.getMessage());
         }
 
         this.pocetPrvkovVBatohu = 0;
         this.batoh = new ArrayList<>();
+        this.nezaradenePredmety = new ArrayList<>();
     };
 
     public void spustiDualnuVsuvaciuHeuristiku() {
         while (!this.zoznamDoposialNespracovanychPredmetov.isEmpty()) {
             if (this.pocetPrvkovVBatohu >= 250 && this.hmotnostPredmetovVBatohu >= 10000) {
-                break;
+                Predmet nezaradenyPredmet = this.zoznamDoposialNespracovanychPredmetov.poll();
+                this.nezaradenePredmety.add(nezaradenyPredmet);
             }
             Predmet vkladanyPredmet = this.zoznamDoposialNespracovanychPredmetov.poll();
             if (vkladanyPredmet == null) break;
@@ -44,10 +45,10 @@ public class DualnaVsuvaciaHeuristika {
     }
 
     public void dajVystup() throws IOException {
-        this.fileWriter = new FileWriter("vystup.txt");
+        FileWriter fileWriter = new FileWriter("vystup.txt");
         System.out.println("HUF = " + this.HUF);
 
-        try (BufferedWriter writer = new BufferedWriter(this.fileWriter)) {
+        try (BufferedWriter writer = new BufferedWriter(fileWriter)) {
             writer.write("Pocet predmetov = " + this.pocetPrvkovVBatohu);
             writer.newLine();
             writer.write("Hmotnost = " + this.hmotnostPredmetovVBatohu);
@@ -65,5 +66,21 @@ public class DualnaVsuvaciaHeuristika {
 
     public List<Predmet> getBatoh() {
         return batoh;
+    }
+
+    public List<Predmet> getNezaradenePredmety() {
+        return nezaradenePredmety;
+    }
+
+    public int getHUF() {
+        return HUF;
+    }
+
+    public int getHmotnostPredmetovVBatohu() {
+        return hmotnostPredmetovVBatohu;
+    }
+
+    public int getPocetPrvkovVBatohu() {
+        return pocetPrvkovVBatohu;
     }
 }
