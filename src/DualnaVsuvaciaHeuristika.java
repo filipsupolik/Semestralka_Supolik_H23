@@ -18,6 +18,7 @@ public class DualnaVsuvaciaHeuristika {
     public DualnaVsuvaciaHeuristika(String suborHmotnosti, String suborCeny) {
         FileLoader fileLoader = new FileLoader();
         this.HUF = 0;
+        this.hmotnostPredmetovVBatohu = 0;
         try{
             this.zoznamDoposialNespracovanychPredmetov = fileLoader.nacitajPrvky(suborHmotnosti, suborCeny);
         } catch (IOException e) {
@@ -34,13 +35,14 @@ public class DualnaVsuvaciaHeuristika {
             if (this.pocetPrvkovVBatohu >= 250 && this.hmotnostPredmetovVBatohu >= 10000) {
                 Predmet nezaradenyPredmet = this.zoznamDoposialNespracovanychPredmetov.poll();
                 this.nezaradenePredmety.add(nezaradenyPredmet);
+            } else {
+                Predmet vkladanyPredmet = this.zoznamDoposialNespracovanychPredmetov.poll();
+                if (vkladanyPredmet == null) break;
+                this.batoh.add(vkladanyPredmet);
+                this.HUF += vkladanyPredmet.getCenaPredmetu();
+                this.hmotnostPredmetovVBatohu += vkladanyPredmet.getHmotnostPredmetu();
+                this.pocetPrvkovVBatohu++;
             }
-            Predmet vkladanyPredmet = this.zoznamDoposialNespracovanychPredmetov.poll();
-            if (vkladanyPredmet == null) break;
-            this.batoh.add(vkladanyPredmet);
-            this.HUF += vkladanyPredmet.getCenaPredmetu();
-            this.hmotnostPredmetovVBatohu += vkladanyPredmet.getHmotnostPredmetu();
-            this.pocetPrvkovVBatohu++;
         }
     }
 
@@ -53,10 +55,10 @@ public class DualnaVsuvaciaHeuristika {
             int najhorsiOut = 0;
             for (int i = 0; i < batoh.size(); i++) {
                 for (int j = 0; j < nezaradenePredmety.size(); j++) {
-                    int aktualnaHUF = this.HUF - this.batoh.get(i).getCenaPredmetu() + nezaradenePredmety.get(j).getCenaPredmetu();
-                    int aktualnaHmotnostPredmetov = this.hmotnostPredmetovVBatohu - this.batoh.get(i).getHmotnostPredmetu() + nezaradenePredmety.get(j).getHmotnostPredmetu();
-                    if (aktualnaHUF <= this.HUF && aktualnaHmotnostPredmetov >= 10000) {
-                        int rozdiel = this.HUF - aktualnaHUF;
+                    int nováHUF = this.HUF - this.batoh.get(i).getCenaPredmetu() + nezaradenePredmety.get(j).getCenaPredmetu();
+                    int novaHmotnostPredmetov = this.hmotnostPredmetovVBatohu - this.batoh.get(i).getHmotnostPredmetu() + nezaradenePredmety.get(j).getHmotnostPredmetu();
+                    if (nováHUF <= this.HUF && novaHmotnostPredmetov >= 10000) {
+                        int rozdiel = this.HUF - nováHUF;
                         if (rozdiel > najvacsiRozdiel) {
                             najvacsiRozdiel = rozdiel;
                             najlepsiIn = j;
